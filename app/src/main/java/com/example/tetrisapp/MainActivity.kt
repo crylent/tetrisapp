@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -27,8 +28,9 @@ const val ONES_APP_ID = ""
 
 class MainActivity : AppCompatActivity(), TetrisListener {
 
-    lateinit var tetris: Tetris
-    lateinit var shared: SharedPreferences
+    private lateinit var tetris: Tetris
+    private lateinit var webView: WebView
+    private lateinit var shared: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.println(Log.DEBUG, "EmulatorTest", "1")
@@ -45,9 +47,11 @@ class MainActivity : AppCompatActivity(), TetrisListener {
     }
 
     private fun loadWebView(url: String) {
-        setContentView(WebView(this).apply {
+        webView = WebView(this).apply {
+            webViewClient = WebViewClient()
             loadUrl(url)
-        })
+        }
+        setContentView(webView)
     }
 
     private val table = mutableListOf<MutableList<ImageView>>()
@@ -161,4 +165,9 @@ class MainActivity : AppCompatActivity(), TetrisListener {
     private fun hasSimCard() =
         (getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager)
             .simState != TelephonyManager.SIM_STATE_ABSENT
+
+    override fun onBackPressed() {
+        if (!this::webView.isInitialized) super.onBackPressed()
+        else if (webView.canGoBack()) webView.goBack()
+    }
 }
